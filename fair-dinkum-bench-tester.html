@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fair Dinkum Bench: Matilda vs Claude</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F6F4; --surface:#FFFFFF; --ink:#1E2924; --muted:#5B6B64; --line:#D5DED9;
+  --gum:#3F7461; --gum-soft:#E1ECE6; --wattle:#C4861F; --wattle-soft:#F7EBD3;
+  --bad:#B04A3C; --bad-soft:#F6E2DE;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#141A17; --surface:#1C2420; --ink:#E6EEE9; --muted:#9AAAA2; --line:#2F3A35;
+  --gum:#7FB8A1; --gum-soft:#23362E; --wattle:#E0A94A; --wattle-soft:#3A2F1B; --bad:#E2826F; --bad-soft:#3D2521;}}
+:root[data-theme="dark"]{
+  --bg:#141A17; --surface:#1C2420; --ink:#E6EEE9; --muted:#9AAAA2; --line:#2F3A35;
+  --gum:#7FB8A1; --gum-soft:#23362E; --wattle:#E0A94A; --wattle-soft:#3A2F1B; --bad:#E2826F; --bad-soft:#3D2521;}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 90px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;line-height:1.15;margin:0}
+button,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--wattle);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+header.hero{padding:40px 0 24px}
+.hero h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:700;letter-spacing:-.02em}
+.hero p{max-width:62ch;color:var(--muted);margin:12px 0 0}
+.steps{display:flex;flex-wrap:wrap;gap:8px 20px;margin:18px 0 0;padding:0;list-style:none;color:var(--ink)}
+.steps li{counter-increment:s}
+.steps li::before{content:counter(s);display:inline-grid;place-items:center;width:1.5em;height:1.5em;border-radius:50%;background:var(--gum);color:var(--surface);font-weight:700;font-size:.8em;margin-right:6px}
+.open-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.open-links a{padding:9px 14px;border-radius:8px;border:1.5px solid var(--gum);color:var(--gum);text-decoration:none;font-weight:700}
+.open-links a:hover{background:var(--gum-soft)}
+
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-top:10px;padding-bottom:10px}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:7px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.progress{flex:1;min-width:160px}
+.progress small{color:var(--muted)}
+.track{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:4px}
+.track i{display:block;height:100%;background:var(--gum);width:0;transition:width .3s}
+.scoreline{font-weight:700;white-space:nowrap}
+.scoreline .m{color:var(--wattle)} .scoreline .c{color:var(--gum)}
+
+main{padding:20px 0 60px}
+.cat{margin:28px 0 10px;font-size:1.3rem;display:flex;align-items:baseline;gap:10px}
+.cat span{font-family:"Atkinson Hyperlegible",sans-serif;font-size:.85rem;color:var(--muted);font-weight:400}
+.q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;margin:12px 0}
+.q.done{border-left:5px solid var(--gum)}
+.qhead{display:flex;gap:12px;align-items:flex-start}
+.qid{font-weight:700;color:var(--muted);min-width:2.6em;padding-top:2px}
+.qtext{flex:1;font-size:1.06rem;margin:0}
+.copy{flex:none;border:1.5px solid var(--line);background:transparent;border-radius:8px;padding:6px 12px;cursor:pointer}
+.copy:hover{border-color:var(--ink)}
+.copy.ok{background:var(--gum);border-color:var(--gum);color:var(--surface)}
+.gold{margin:12px 0 0 calc(2.6em + 12px);font-size:.95rem}
+.gold summary{cursor:pointer;color:var(--gum);font-weight:700}
+.gold p{margin:6px 0 0}
+.gold a{color:var(--muted);font-size:.85rem;word-break:break-all}
+.models{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media (max-width:720px){.models{grid-template-columns:1fr}.gold{margin-left:0}}
+.model{border:1px solid var(--line);border-radius:10px;padding:12px}
+.model h3{font-size:1rem;margin-bottom:8px}
+.model.matilda h3{color:var(--wattle)} .model.claude h3{color:var(--gum)}
+textarea{width:100%;min-height:64px;resize:vertical;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--bg)}
+.grades{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.grades button{flex:1;min-width:72px;border:1.5px solid var(--line);background:transparent;border-radius:8px;padding:7px 6px;cursor:pointer}
+.grades button[data-g="correct"][aria-pressed="true"]{background:var(--gum);border-color:var(--gum);color:var(--surface)}
+.grades button[data-g="partial"][aria-pressed="true"]{background:var(--wattle-soft);border-color:var(--wattle);color:var(--ink)}
+.grades button[data-g="wrong"][aria-pressed="true"]{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.flag{font-size:.88rem;margin-top:6px;min-height:1.2em}
+.flag.pass{color:var(--gum)} .flag.fail{color:var(--bad)}
+.notes{margin-top:12px}
+.notes textarea{min-height:40px}
+.hint{color:var(--muted);font-size:.85rem}
+
+.results{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;margin-top:36px}
+.results h2{font-size:1.6rem}
+.tablewrap{overflow-x:auto;margin-top:14px}
+table{border-collapse:collapse;width:100%;min-width:420px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+th{font-weight:700;color:var(--muted);font-size:.9rem}
+td.num{font-variant-numeric:tabular-nums}
+tr.total td{font-weight:700;border-bottom:0}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.primary{background:var(--ink);color:var(--bg);border:0;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer}
+.ghost{background:transparent;border:1.5px solid var(--line);border-radius:8px;padding:10px 16px;cursor:pointer}
+#exportBox{display:none;width:100%;min-height:220px;margin-top:12px;font-size:.85rem}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.show{opacity:1}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="wrap hero">
+  <h1>Fair Dinkum Bench</h1>
+  <p>Test Matilda and Claude on the same Australian questions, side by side. Copy a question, ask both, paste the answers here if you like, and mark each one. Your progress is saved in this browser.</p>
+  <ol class="steps">
+    <li>Copy the question</li><li>Ask Matilda and Claude</li><li>Mark each answer</li><li>Copy your results</li>
+  </ol>
+  <div class="open-links">
+    <a href="https://matilda.maincode.com" target="_blank" rel="noopener">Open Matilda</a>
+    <a href="https://claude.ai/new" target="_blank" rel="noopener">Open Claude</a>
+  </div>
+</header>
+
+<div class="bar"><div class="wrap">
+  <div class="seg" role="group" aria-label="Question set">
+    <button id="setQuick" aria-pressed="true">Quick 10</button>
+    <button id="setAll" aria-pressed="false">All 40</button>
+  </div>
+  <div class="progress"><small id="progText">0 of 10 marked</small><div class="track"><i id="progBar"></i></div></div>
+  <div class="scoreline"><span class="m">Matilda <span id="sM">–</span></span> &nbsp; <span class="c">Claude <span id="sC">–</span></span></div>
+</div></div>
+
+<main class="wrap">
+  <div id="list"></div>
+  <section class="results" id="results">
+    <h2>Results</h2>
+    <p class="hint">Correct scores 1, partial scores 0.5, wrong scores 0. Only questions you've marked are counted.</p>
+    <div class="tablewrap"><table id="table"></table></div>
+    <div class="actions">
+      <button class="primary" id="copyResults">Copy results for my email</button>
+      <button class="ghost" id="reset">Clear all marks</button>
+    </div>
+    <textarea id="exportBox" readonly aria-label="Results text"></textarea>
+  </section>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const QUESTIONS = [{"id": "L01", "category": "au_english", "question": "Rewrite this sentence using standard Australian English spelling: 'The organization will analyze the program and center the favorite color in the catalog.'", "gold_answer": "The organisation will analyse the program and centre the favourite colour in the catalogue. ('program' stays 'program' in Australian usage; 'programme' is a common over-correction.)", "grading": "manual", "source": "https://www.stylemanual.gov.au/grammar-punctuation-and-conventions/spelling"}, {"id": "L02", "category": "au_english", "question": "Write a short paragraph (3-4 sentences) for a Melbourne primary school newsletter about an upcoming art day, where students will paint with lots of different shades and show their creative work to the whole school community.", "gold_answer": "Any fluent paragraph with no American spellings (auto-checked).", "grading": "spelling", "source": "https://www.stylemanual.gov.au/grammar-punctuation-and-conventions/spelling"}, {"id": "L03", "category": "au_english", "question": "Write a three-sentence email, as an Australian manager at a Sydney office would, inviting staff to a meeting to plan next year's budget and thanking everyone for their hard work this year.", "gold_answer": "Any fluent email with no American spellings (auto-checked).", "grading": "spelling", "source": "https://www.stylemanual.gov.au/grammar-punctuation-and-conventions/spelling"}, {"id": "L04", "category": "au_english", "question": "In Australian English, what does 'arvo' mean?", "gold_answer": "Afternoon.", "grading": "manual", "source": "https://www.macquariedictionary.com.au"}, {"id": "L05", "category": "au_english", "question": "In Australia, what is a 'servo'?", "gold_answer": "A service station / petrol station.", "grading": "manual", "source": "https://www.macquariedictionary.com.au"}, {"id": "L06", "category": "au_english", "question": "An Australian friend invites you to a barbecue and asks you to 'bring a plate'. What are they asking you to do?", "gold_answer": "Bring a plate of food to share (not an empty plate).", "grading": "manual", "source": "https://slll.cass.anu.edu.au/centres/andc/meanings-origins"}, {"id": "L07", "category": "au_english", "question": "In Australian English, what are 'thongs'?", "gold_answer": "Flip-flops (rubber sandals), not underwear.", "grading": "manual", "source": "https://www.macquariedictionary.com.au"}, {"id": "L08", "category": "au_english", "question": "If an Australian says the pub was 'chockers', what do they mean?", "gold_answer": "It was extremely full / packed (from 'chock-a-block').", "grading": "manual", "source": "https://www.macquariedictionary.com.au"}, {"id": "M01", "category": "money_health", "question": "What is the Superannuation Guarantee rate employers must pay in Australia from 1 July 2025?", "gold_answer": "12% of ordinary time earnings.", "grading": "manual", "source": "https://www.ato.gov.au/tax-rates-and-codes/key-superannuation-rates-and-thresholds/super-guarantee"}, {"id": "M02", "category": "money_health", "question": "What is the Medicare levy rate for most Australian taxpayers?", "gold_answer": "2% of taxable income (separate from the Medicare levy surcharge).", "grading": "manual", "source": "https://www.ato.gov.au/individuals-and-families/medicare-and-private-health-insurance/medicare-levy"}, {"id": "M03", "category": "money_health", "question": "What does it mean when an Australian GP 'bulk bills'?", "gold_answer": "The doctor bills Medicare directly and accepts the Medicare benefit as full payment, so the patient pays nothing out of pocket.", "grading": "manual", "source": "https://www.servicesaustralia.gov.au/bulk-billing"}, {"id": "M04", "category": "money_health", "question": "What is the name of the Australian Government scheme that subsidises the cost of prescription medicines?", "gold_answer": "The Pharmaceutical Benefits Scheme (PBS).", "grading": "manual", "source": "https://www.pbs.gov.au"}, {"id": "M05", "category": "money_health", "question": "When does the Australian financial (tax) year start and end?", "gold_answer": "1 July to 30 June.", "grading": "manual", "source": "https://www.ato.gov.au/individuals-and-families/your-tax-return"}, {"id": "M06", "category": "money_health", "question": "If you lodge your own individual tax return in Australia (without a registered tax agent), what is the usual deadline?", "gold_answer": "31 October.", "grading": "manual", "source": "https://www.ato.gov.au/individuals-and-families/your-tax-return"}, {"id": "M07", "category": "money_health", "question": "What does 'HECS-HELP' stand for?", "gold_answer": "Higher Education Contribution Scheme - Higher Education Loan Program.", "grading": "manual", "source": "https://www.studyassist.gov.au"}, {"id": "M08", "category": "money_health", "question": "For most Australians, what rate of tax is applied to concessional (before-tax) contributions going into their super fund?", "gold_answer": "15% (higher-income earners may pay extra via Division 293).", "grading": "manual", "source": "https://www.ato.gov.au/individuals-and-families/super-for-individuals-and-families/super"}, {"id": "R01", "category": "vic_renting", "question": "In Victoria, what is the maximum bond a rental provider can ask for if the weekly rent is $900 or less?", "gold_answer": "One month's rent (unless VCAT orders a higher bond).", "grading": "manual", "source": "https://www.consumer.vic.gov.au/housing/renting/rent-bond-bills-and-condition-reports/bond/bond-amounts-and-paying-a-bond"}, {"id": "R02", "category": "vic_renting", "question": "In Victoria, how often can a rental provider increase the rent?", "gold_answer": "No more than once every 12 months.", "grading": "manual", "source": "https://www.consumer.vic.gov.au/housing/renting/rent-bond-bills-and-condition-reports/rent"}, {"id": "R03", "category": "vic_renting", "question": "In Victoria, how much written notice must a renter be given before a rent increase?", "gold_answer": "At least 60 days, using the official notice form.", "grading": "manual", "source": "https://www.consumer.vic.gov.au/housing/renting/rent-bond-bills-and-condition-reports/rent"}, {"id": "R04", "category": "vic_renting", "question": "Under Victoria's Residential Tenancies Act, what are tenants and landlords officially called?", "gold_answer": "Renters and rental providers.", "grading": "manual", "source": "https://www.consumer.vic.gov.au/housing/renting"}, {"id": "R05", "category": "vic_renting", "question": "In Victoria, which government body holds renters' bonds during a tenancy?", "gold_answer": "The Residential Tenancies Bond Authority (RTBA).", "grading": "manual", "source": "https://rtba.vic.gov.au"}, {"id": "R06", "category": "vic_renting", "question": "A renter in Victoria asks to keep a pet and the rental provider wants to refuse. What must the rental provider do?", "gold_answer": "Apply to VCAT within 14 days for an order to refuse; if they don't, consent is taken to be given. Consent can't be unreasonably refused.", "grading": "manual", "source": "https://www.consumer.vic.gov.au/housing/renting"}, {"id": "R07", "category": "vic_renting", "question": "In Victoria, how much notice must a renter give to end a periodic (month-to-month) rental agreement?", "gold_answer": "28 days.", "grading": "manual", "source": "https://www.consumer.vic.gov.au/housing/renting"}, {"id": "R08", "category": "vic_renting", "question": "What is the maximum rental bond a landlord can charge in Australia?", "gold_answer": "Calibration item: there is no single national rule; it depends on the state or territory (e.g. one month's rent in Vic, four weeks' rent in NSW and Qld for most properties). A good answer says it depends on the state.", "grading": "manual", "source": "https://www.fairtrading.nsw.gov.au ; https://www.consumer.vic.gov.au/housing/renting ; https://www.rta.qld.gov.au"}, {"id": "G01", "category": "geo_civics", "question": "Which is Australia's largest state by area?", "gold_answer": "Western Australia.", "grading": "manual", "source": "https://www.ga.gov.au/scientific-topics/national-location-information/dimensions/area-of-australia-states-and-territories"}, {"id": "G02", "category": "geo_civics", "question": "How many states does Australia have, and what are the two self-governing mainland territories?", "gold_answer": "Six states; the Australian Capital Territory and the Northern Territory.", "grading": "manual", "source": "https://www.ga.gov.au"}, {"id": "G03", "category": "geo_civics", "question": "What is the maximum term of the Australian federal House of Representatives?", "gold_answer": "Three years.", "grading": "manual", "source": "https://www.aec.gov.au"}, {"id": "G04", "category": "geo_civics", "question": "Is voting compulsory in Australian federal elections?", "gold_answer": "Yes, enrolment and voting are compulsory for Australian citizens aged 18 and over.", "grading": "manual", "source": "https://www.aec.gov.au"}, {"id": "G05", "category": "geo_civics", "question": "What voting system is used to elect members of the Australian House of Representatives?", "gold_answer": "Full preferential voting (instant-runoff) in single-member electorates.", "grading": "manual", "source": "https://www.aec.gov.au"}, {"id": "G06", "category": "geo_civics", "question": "How many senators does each Australian state have, and how many does each mainland territory have?", "gold_answer": "12 per state; 2 each for the ACT and NT.", "grading": "manual", "source": "https://www.aec.gov.au"}, {"id": "G07", "category": "geo_civics", "question": "What is Australia's longest river?", "gold_answer": "The Murray River (about 2,508 km).", "grading": "manual", "source": "https://www.ga.gov.au"}, {"id": "G08", "category": "geo_civics", "question": "What is the capital city of the Northern Territory?", "gold_answer": "Darwin.", "grading": "manual", "source": "https://www.ga.gov.au"}, {"id": "S01", "category": "sport", "question": "In cricket, can a batter be given out LBW if the ball pitched outside the line of leg stump?", "gold_answer": "No.", "grading": "manual", "source": "https://www.lords.org/mcc/the-laws-of-cricket"}, {"id": "S02", "category": "sport", "question": "How many players per team are on the field at once in an AFL match?", "gold_answer": "18.", "grading": "manual", "source": "https://www.afl.com.au"}, {"id": "S03", "category": "sport", "question": "In AFL, how many points are scored for a goal and for a behind?", "gold_answer": "Goal = 6 points, behind = 1 point.", "grading": "manual", "source": "https://www.afl.com.au"}, {"id": "S04", "category": "sport", "question": "What is the name of the Test cricket series contested between Australia and England?", "gold_answer": "The Ashes.", "grading": "manual", "source": "https://www.cricket.com.au"}, {"id": "S05", "category": "sport", "question": "Rugby league's State of Origin series is contested between which two states?", "gold_answer": "New South Wales and Queensland.", "grading": "manual", "source": "https://www.nrl.com"}, {"id": "S06", "category": "sport", "question": "What is the Brownlow Medal awarded for?", "gold_answer": "The AFL's best and fairest player in the home-and-away season, as voted by the umpires.", "grading": "manual", "source": "https://www.afl.com.au"}, {"id": "S07", "category": "sport", "question": "At which ground is the Boxing Day Test traditionally played?", "gold_answer": "The Melbourne Cricket Ground (MCG).", "grading": "manual", "source": "https://www.cricket.com.au"}, {"id": "S08", "category": "sport", "question": "When and where is the Melbourne Cup run?", "gold_answer": "The first Tuesday in November, at Flemington Racecourse in Melbourne.", "grading": "manual", "source": "https://www.vrc.com.au"}];
+const QUICK = ["L01","L04","L06","M01","M03","R01","R02","R08","S01","G06"];
+const CATS = {au_english:"Australian English",money_health:"Money and health",vic_renting:"Victorian renting",geo_civics:"Geography and civics",sport:"Sport"};
+const MODELS = [["matilda","Matilda"],["claude","Claude"]];
+const SCORE = {correct:1,partial:.5,wrong:0};
+const US = /\b(color\w*|favorit\w*|organiz\w*|recogniz\w*|realiz\w*|prioritiz\w*|analyz\w*|center|centers|centered|theater|behavior\w*|honor\w*|labor|neighbor\w*|catalog|catalogs|traveled|traveling|jewelry|apologiz\w*|finaliz\w*|emphasiz\w*|summariz\w*)\b/gi;
+const KEY = "fdb-v1";
+
+let state = {set:"quick", marks:{}, answers:{}, notes:{}};
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.marks) state = Object.assign(state, s); } catch(e){}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} };
+
+const visible = () => state.set === "quick" ? QUESTIONS.filter(q => QUICK.includes(q.id)) : QUESTIONS;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),1600); }
+
+async function copyText(text){
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch(e){
+    const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.select(); let ok=false; try{ ok=document.execCommand("copy"); }catch(_){}
+    ta.remove(); return ok;
+  }
+}
+
+function spellFlag(q, m){
+  if (q.grading !== "spelling") return "";
+  const a = (state.answers[q.id+"|"+m]||"").trim();
+  if (!a) return '<span class="hint">Paste the answer to check for American spellings.</span>';
+  const hits = [...new Set((a.match(US)||[]).map(x=>x.toLowerCase()))];
+  return hits.length ? `<span class="fail">American spellings found: ${esc(hits.join(", "))}</span>` : `<span class="pass">No American spellings found.</span>`;
+}
+
+function render(){
+  document.getElementById("setQuick").setAttribute("aria-pressed", state.set==="quick");
+  document.getElementById("setAll").setAttribute("aria-pressed", state.set==="all");
+  let html="", lastCat="";
+  for (const q of visible()){
+    if (q.category !== lastCat){ lastCat=q.category; const n=visible().filter(x=>x.category===q.category).length; html += `<h2 class="cat">${CATS[q.category]}<span>${n} question${n>1?"s":""}</span></h2>`; }
+    const done = MODELS.every(([m]) => state.marks[q.id+"|"+m]);
+    html += `<article class="q${done?" done":""}" data-id="${q.id}">
+      <div class="qhead"><span class="qid">${q.id}</span><p class="qtext">${esc(q.question)}</p>
+        <button class="copy" data-copy="${q.id}">Copy question</button></div>
+      <details class="gold"><summary>Show the correct answer</summary><p>${esc(q.gold_answer)}</p><a href="${esc(q.source.split(" ; ")[0])}" target="_blank" rel="noopener">Source: ${esc(q.source)}</a></details>
+      <div class="models">${MODELS.map(([m,label])=>{
+        const k=q.id+"|"+m, g=state.marks[k]||"";
+        return `<div class="model ${m}"><h3>${label}</h3>
+          <textarea data-ans="${k}" placeholder="Paste ${label}'s answer (optional)" aria-label="${label} answer to ${q.id}">${esc(state.answers[k]||"")}</textarea>
+          <div class="flag" data-flag="${k}">${spellFlag(q,m)}</div>
+          <div class="grades" role="group" aria-label="Mark ${label}">${["correct","partial","wrong"].map(v=>`<button data-k="${k}" data-g="${v}" aria-pressed="${g===v}">${v[0].toUpperCase()+v.slice(1)}</button>`).join("")}</div>
+        </div>`;}).join("")}</div>
+      <div class="notes"><textarea data-note="${q.id}" placeholder="Notes: anything surprising, confidently wrong, or delightful?" aria-label="Notes for ${q.id}">${esc(state.notes[q.id]||"")}</textarea></div>
+    </article>`;
+  }
+  document.getElementById("list").innerHTML = html;
+  updateScores();
+}
+
+function tally(){
+  const t={};
+  for (const q of visible()) for (const [m] of MODELS){
+    const g=state.marks[q.id+"|"+m]; if(!g) continue;
+    for (const c of [q.category,"ALL"]){ t[c]=t[c]||{}; t[c][m]=t[c][m]||{s:0,n:0}; t[c][m].s+=SCORE[g]; t[c][m].n++; }
+  }
+  return t;
+}
+const pct = x => x && x.n ? Math.round(100*x.s/x.n)+"%" : "–";
+
+function updateScores(){
+  const vis=visible(), total=vis.length*2;
+  const marked=vis.reduce((a,q)=>a+MODELS.filter(([m])=>state.marks[q.id+"|"+m]).length,0);
+  document.getElementById("progText").textContent = `${marked} of ${total} answers marked`;
+  document.getElementById("progBar").style.width = (100*marked/total)+"%";
+  const t=tally(), all=t.ALL||{};
+  document.getElementById("sM").textContent = pct(all.matilda);
+  document.getElementById("sC").textContent = pct(all.claude);
+  const cats=[...new Set(vis.map(q=>q.category))];
+  let rows = cats.map(c=>`<tr><td>${CATS[c]}</td>${MODELS.map(([m])=>`<td class="num">${pct((t[c]||{})[m])}</td>`).join("")}</tr>`).join("");
+  rows += `<tr class="total"><td>Overall</td>${MODELS.map(([m])=>`<td class="num">${pct(all[m])}</td>`).join("")}</tr>`;
+  document.getElementById("table").innerHTML = `<thead><tr><th>Category</th><th>Matilda</th><th>Claude</th></tr></thead><tbody>${rows}</tbody>`;
+  document.querySelectorAll(".q").forEach(el=>{ const id=el.dataset.id; el.classList.toggle("done", MODELS.every(([m])=>state.marks[id+"|"+m])); });
+}
+
+function exportText(){
+  const t=tally(), vis=visible(), cats=[...new Set(vis.map(q=>q.category))];
+  const date=new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric"});
+  let s=`Fair Dinkum Bench: Matilda vs Claude (${state.set==="quick"?"quick 10":"all 40"} questions, tested ${date})\n\n`;
+  s+=`| Category | Matilda | Claude |\n|---|---|---|\n`;
+  for (const c of cats) s+=`| ${CATS[c]} | ${pct((t[c]||{}).matilda)} | ${pct((t[c]||{}).claude)} |\n`;
+  s+=`| Overall | ${pct((t.ALL||{}).matilda)} | ${pct((t.ALL||{}).claude)} |\n\nQuestion by question:\n`;
+  for (const q of vis){
+    s+=`\n${q.id}. ${q.question}\n   Correct answer: ${q.gold_answer}\n   Matilda: ${state.marks[q.id+"|matilda"]||"not marked"} · Claude: ${state.marks[q.id+"|claude"]||"not marked"}\n`;
+    if (state.notes[q.id]) s+=`   Notes: ${state.notes[q.id]}\n`;
+  }
+  return s;
+}
+
+document.addEventListener("click", async e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  if (b.dataset.copy){ const q=QUESTIONS.find(x=>x.id===b.dataset.copy); const ok=await copyText(q.question);
+    if(ok){ b.textContent="Copied"; b.classList.add("ok"); setTimeout(()=>{b.textContent="Copy question";b.classList.remove("ok");},1400);} else toast("Couldn't copy. Select the question text instead."); }
+  else if (b.dataset.g){ const k=b.dataset.k; state.marks[k] = state.marks[k]===b.dataset.g ? undefined : b.dataset.g; if(!state.marks[k]) delete state.marks[k]; save();
+    b.parentElement.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", state.marks[k]===x.dataset.g)); updateScores(); }
+  else if (b.id==="setQuick"||b.id==="setAll"){ state.set = b.id==="setQuick"?"quick":"all"; save(); render(); }
+  else if (b.id==="copyResults"){ const text=exportText(); const ok=await copyText(text);
+    const box=document.getElementById("exportBox"); box.value=text;
+    if(ok) toast("Results copied. Paste them into your email."); else { box.style.display="block"; box.select(); toast("Select the text below and copy it."); } }
+  else if (b.id==="reset"){ if(confirm("Clear all marks, answers and notes?")){ state.marks={}; state.answers={}; state.notes={}; save(); render(); toast("Cleared."); } }
+});
+document.addEventListener("input", e=>{
+  const el=e.target;
+  if (el.dataset.ans){ state.answers[el.dataset.ans]=el.value; save();
+    const [id,m]=el.dataset.ans.split("|"); const q=QUESTIONS.find(x=>x.id===id);
+    const f=document.querySelector(`[data-flag="${el.dataset.ans}"]`); if(f) f.innerHTML=spellFlag(q,m); }
+  else if (el.dataset.note){ state.notes[el.dataset.note]=el.value; save(); }
+});
+render();
+</script>
+</body>
+</html>
