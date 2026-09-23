@@ -31,17 +31,13 @@ The most revealing question was simple: *In Victoria, what is the maximum bond a
 
 **Both models got it wrong.**
 
-> **Matilda:** [paste Matilda's answer]
->
-> **Claude:** [paste Claude's answer]
-
 This is a telling error, because "four weeks' rent" is the rule in other states, such as NSW and Queensland. Victoria's rule is different. Both models appear to have applied the common national pattern instead of the specific Victorian law. Matilda repeated the same error in a second question, about bonds across Australia, although it correctly explained that the rules depend on each state.
 
 **Why this matters.** A wrong bond figure isn't a trivia miss. A renter could overpay, or fail to challenge an unlawful request, because an AI gave them the wrong rule with confidence. Renting law is local, detailed and changes often (Victoria brought in major reforms in November 2025). That makes it one of the clearest places an Australian-built model can pull ahead of global ones, and this test shows the opportunity is still open.
 
 ## Where else Matilda slipped
 
-Matilda was only partly right on the spelling task: rewriting an American sentence into Australian English. [Describe what it missed, e.g. which word it left in American spelling or over-corrected.] Claude got this one fully right. It's a small miss, but Australian spelling is something an Australian model should get right every time.
+Matilda was only partly right on the spelling task: rewriting an American sentence into Australian English. When asked to rewrite the sentence using standard Australian English spelling: 'The organization will analyze the program and center the favorite color in the catalog.' Matilda overcorrected on the word programme when in reality Aussie's are more accustomed to using program instead of programme (British English Spelling). Claude got this one fully right. It's a small miss, but Australian spelling is something an Australian model should get right every time.
 
 ## What I'd build to make Matilda better
 
